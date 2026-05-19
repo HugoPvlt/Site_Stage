@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body class="page-admin">
+    <header><img src="../img/logo_Test.png" alt="logo de l'entreprise" class="logo"></header>
+    
+    <div class="admin-container">
+        <div class="admin-gauche">
+            <form class="form_connexion">
+                <p>Identifiant</p>
+                <input type="text" placeholder="identifiant" required>
+                
+                <div class="password-container">
+                    <p>Mot de passe</p>
+                    <input type="password" id="password" placeholder="Mot de passe" required>
+                    <button type="button" id="togglePassword" class="show-btn">Voir</button>
+                </div>
+
+                <button type="submit" class="connexion-btn">Ajouter</button>
+            </form>
+        </div>
+
+        <div class="admin-droite">
+            <input type="text" placeholder="recherche utilisateur" class="Recherche">
+            <div class="form_fichier">
+                <p>Aucun utilisateur</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer></footer>
+    <script src="../JS/connexion.js"></script>
+</body>
+</html>

@@ -8,11 +8,22 @@
 </head>
 <body>
     <header><img src="../img/logo_Test.png" alt="logo de l'entreprise" class="logo"></header>
-    <form>
-        <input type="text" placeholder="identifiant"><br>
-        <input type="text" placeholder="Mot de passe">
+    
+    <form class="form_connexion" action="client.html">
+        <p>Identifiant</p>
+        <input type="text" placeholder="identifiant" required>
+        
+        <div class="password-container">
+            <p>Mot de passe</p>
+            <input type="password" id="password" placeholder="Mot de passe" required>
+            <button type="button" id="togglePassword" class="show-btn">Voir</button>
+        </div>
+
+        <button type="submit" class="connexion-btn">Connexion</button>
     </form>
+    
     <footer></footer>
 
-    </body>
+    <script src="../JS/connexion.js"></script>
+</body>
 </html>
