@@ -13,7 +13,7 @@
         <div class="admin-gauche">
             <form class="form_connexion">
                 <p>Identifiant</p>
-                <input type="text" placeholder="identifiant" required>
+                <input type="text" placeholder="identifiant" id="id_admin"required>
                 
                 <div class="password-container">
                     <p>Mot de passe</p>
@@ -21,19 +21,28 @@
                     <button type="button" id="togglePassword" class="show-btn">Voir</button>
                 </div>
 
-                <button type="submit" class="connexion-btn">Ajouter</button>
+                <button type="submit" id="btn-ajouter-admin" class="connexion-btn">Ajouter</button>
             </form>
         </div>
 
         <div class="admin-droite">
             <input type="text" placeholder="recherche utilisateur" class="Recherche">
-            <div class="form_fichier">
-                <p>Aucun utilisateur</p>
+            <div class="form_tab_USER">
+                <table id="tab_id_MDP" class="tab_USER" >
+                    <tr>
+                        <th>identifiant</th>
+                        <th>Mot de passe</th>
+                    </tr>
+                    
+                    
+                </table>
+                
+                <p id="txt_base">Aucun utilisateur</p>
             </div>
         </div>
     </div>
     
     <footer></footer>
-    <script src="../JS/connexion.js"></script>
+    <script src="../JS/admin.js"></script>
 </body>
 </html>

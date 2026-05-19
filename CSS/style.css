@@ -107,6 +107,7 @@ body.page-client {
     border-radius: 8px;
     margin-bottom: 30px;
     box-sizing: border-box;
+    margin-left: 15%;
 }
 
 .form_fichier {
@@ -121,6 +122,9 @@ body.page-client {
     justify-content: center;     
     align-items: center;         
     padding: 20px;
+    margin-left: 15%;
+    margin-top: 9%;
+    position: absolute;
 }
 
 .form_fichier p {
@@ -183,4 +187,81 @@ body.page-admin .logo {
         align-items: center;
         gap: 30px;
     }
+}
+.form_arborescence {
+    background-color: white;
+    width: 100%;
+    max-width: 800px;            
+    height: 75vh;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;     
+    align-items: center;         
+    padding: 20px;
+    right: 15%;
+    position: absolute;
+    margin-top: 9%;
+}
+.form_arborescence p {
+    font-size: 18px;
+    font-weight: bold;
+    color: #666;
+    margin: 0;
+    text-align: center;
+}
+.import_client_btn{
+    position: absolute;
+    margin-left: 33%;
+    margin-top: 6%;
+    padding: 10px 17px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+
+}
+.import_client_btn:hover {
+    background-color: #3399ff;
+}
+.form_tab_USER {
+    background-color: white;
+    width: 100%;
+    max-width: 800px;            
+    height: 75vh;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    padding: 20px;
+    position: absolute;
+
+    display: flex;
+    flex-direction: column;     
+    justify-content: center;    
+    align-items: center;        
+}
+
+
+.form_tab_USER table {
+    width: 100%;
+    margin-bottom: auto;       
+}
+.form_tab_USER p {
+    font-size: 18px;
+    font-weight: bold;
+    color: #666;
+    margin: 0;
+    text-align: center;
+    margin-bottom: auto;  
+}
+.tab_USER{
+    width: 100%;
+    border-collapse: collapse;
+}
+.tab_USER th{
+    background-color: #f4f4f4;
 }
