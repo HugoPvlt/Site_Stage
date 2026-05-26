@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client</title>
     <link rel="stylesheet" href="../CSS/style.css">
+    <script src="https://unpkg.com/docx-preview@0.1.15/dist/docx-preview.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script src="https://unpkg.com/docx-preview@0.1.15/dist/docx-preview.js"></script>
+
 </head>
 <body class="page-client"> <header><img src="../img/logo_Test.png" alt="logo de l'entreprise" id="logo_Client"></header>
     <input type="text" placeholder="recherche" class="Recherche" >
     <button type="button" id="btn-choisir" class="import_client_btn">importer</button>
-    <input type="file" id="explorateur-fichier" style="display: none;">
+    <input type="file" id="explorateur-fichier" style="display: none;" multiple>
     <form class="form_fichier">
         <p>Aucun fichier sélectionner</p>
     </form>
