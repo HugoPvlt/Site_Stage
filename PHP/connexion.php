@@ -25,11 +25,7 @@ if (!empty($donneesRecues['identifiant']) && !empty($donneesRecues['mot_de_passe
     $user = $requete->fetch(PDO::FETCH_ASSOC);
 
     if ($user) {#vérifie si l'utilisateur est un admin ou un client et si le mot de passe est correct
-        if ($user['role'] === 'admin' && $user['mot_de_passe'] === $mdp_saisi) {
-            $_SESSION['id_utilisateur'] = $user['ID'];
-            echo json_encode(["statut" => "succes", "role" => "admin"]);
-        } 
-        elseif (password_verify($mdp_saisi, $user['mot_de_passe'])) {
+        if (password_verify($mdp_saisi, $user['mot_de_passe'])) {
             $_SESSION['id_utilisateur'] = $user['ID'];
             echo json_encode(["statut" => "succes", "role" => $user['role']]);
         } 

@@ -3,6 +3,17 @@ const MDP = document.getElementById('password');
 const btn_ajouter = document.getElementById('btn-ajouter-admin');
 const txt_vide = document.getElementById('txt_base');
 const tab = document.getElementById('tab_id_MDP');
+const togglePassword = document.querySelector('#togglePassword');
+const passwordInput = document.querySelector('#password');
+const barreRecherche = document.getElementById('barre-recherche');
+
+let tousLesClients = []; 
+
+togglePassword.addEventListener('click', function () {
+    const isPassword = passwordInput.getAttribute('type') === 'password';
+    passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+    this.textContent = isPassword ? 'Masquer' : 'Voir';
+});
 
 document.addEventListener('DOMContentLoaded', () => {//Lance le chargement des clients dès que la page est prête
     chargerListeClients();
@@ -19,34 +30,69 @@ function chargerListeClients() {
             return;
         }
 
-        const lignesExistantes = tab.querySelectorAll('tr');//Nettoie le tableau avant d'ajouter les lignes
-        Array.from(lignesExistantes).forEach((ligne, index) => {
-            if (index > 0) ligne.remove();
-        });
-
-        if (clients.length === 0) {
-            if (txt_vide) txt_vide.style.display = 'block';
-            return;
-        }
-
-        if (txt_vide) txt_vide.style.display = 'none';
-
-        clients.forEach(client => {//Boucle pour insérer chaque client dans le tableau HTML 
-            const ligne = document.createElement('tr');
-
-            const celluleIdentifiant = document.createElement('td');
-            celluleIdentifiant.textContent = client.identifiant;
-
-            const celluleMdp = document.createElement('td');
-            celluleMdp.textContent = "********";//Masque le mot de passe pour la sécurité
-
-            ligne.appendChild(celluleIdentifiant);
-            ligne.appendChild(celluleMdp);
-
-            tab.appendChild(ligne);
-        });
+        tousLesClients = clients; 
+        afficherClients(tousLesClients); 
     })
     .catch(err => console.error("Erreur de récupération des clients :", err));
+}
+
+function afficherClients(listeAAfficher) {
+    const lignesExistantes = tab.querySelectorAll('tr');//Nettoie le tableau avant d'ajouter les lignes
+    Array.from(lignesExistantes).forEach((ligne, index) => {
+        if (index > 0) ligne.remove();
+    });
+
+    if (listeAAfficher.length === 0) {
+        if (txt_vide) txt_vide.style.display = 'block';
+        return;
+    }
+
+    if (txt_vide) txt_vide.style.display = 'none';
+
+    listeAAfficher.forEach(client => {//Boucle pour insérer chaque client dans le tableau HTML 
+        const ligne = document.createElement('tr');
+
+        const celluleIdentifiant = document.createElement('td');
+        celluleIdentifiant.textContent = client.identifiant;
+
+        const celluleMdp = document.createElement('td');
+        celluleMdp.textContent = "********";//Masque le mot de passe pour la sécurité
+
+        const celluleAction = document.createElement('td');
+        const boutonSupprimer = document.createElement('button');
+        boutonSupprimer.textContent = "Supprimer";
+        boutonSupprimer.style.backgroundColor = '#DC3545';
+        boutonSupprimer.style.color = '#FFF';
+        boutonSupprimer.style.border = 'none';
+        boutonSupprimer.style.padding = '5px 10px';
+        boutonSupprimer.style.borderRadius = '4px';
+        boutonSupprimer.style.cursor = 'pointer';
+
+        boutonSupprimer.addEventListener('click', () => {
+            const idBrut = client.id || client.id_utilisateur || client.ID;
+            supprimerUtilisateur(idBrut);
+        });
+
+        celluleAction.appendChild(boutonSupprimer);
+
+        ligne.appendChild(celluleIdentifiant);
+        ligne.appendChild(celluleMdp);
+        ligne.appendChild(celluleAction);
+
+        tab.appendChild(ligne);
+    });
+}
+
+if (barreRecherche) {
+    barreRecherche.addEventListener('input', (evenement) => {
+        const texteSaisi = evenement.target.value.toLowerCase().trim();
+
+        const clientsFiltres = tousLesClients.filter(client => {
+            return client.identifiant.toLowerCase().includes(texteSaisi);
+        });
+
+        afficherClients(clientsFiltres);
+    });
 }
 
 btn_ajouter.addEventListener('click', (evenement) => {
@@ -72,20 +118,11 @@ btn_ajouter.addEventListener('click', (evenement) => {
     .then(reponse => reponse.json())
     .then(data => {
         if (data.statut === "succes") {//Si l'ajout en BDD fonctionne, on l'ajoute directement dans le tableau HTML
-            if (txt_vide) txt_vide.style.display = 'none';
+            chargerListeClients();
 
-            const New_line = document.createElement('tr');
-            const cell_ID = document.createElement('td');
-            const cell_MDP = document.createElement('td');
-            
-            cell_ID.textContent = identifiant.value;
-            cell_MDP.textContent = "********"; 
-            
-            New_line.appendChild(cell_ID);
-            New_line.appendChild(cell_MDP);
-            tab.appendChild(New_line);
+            if (barreRecherche) barreRecherche.value = ""; 
 
-            identifiant.value = "";//#Vide les champs de saisie après l'ajout
+            identifiant.value = "";//Vide les champs de saisie après l'ajout
             MDP.value = "";
         } else {
             alert(data.message);
@@ -96,3 +133,38 @@ btn_ajouter.addEventListener('click', (evenement) => {
         alert("Erreur lors de l'enregistrement en base de données.");
     });
 });
+
+function supprimerUtilisateur(idUtilisateur) {
+    if (!idUtilisateur) {
+        alert("Erreur : ID de l'utilisateur introuvable.");
+        return;
+    }
+
+    if (confirm("Es-tu sûr de vouloir supprimer définitivement cet utilisateur ? Cette action supprimera également tous ses fichiers liés.")) {
+        fetch('../PHP/supprimer_utilisateur.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: idUtilisateur })
+        })
+        .then(reponse => {
+            if (!reponse.ok) {
+                throw new Error("Erreur HTTP " + reponse.status);
+            }
+            return reponse.json();
+        })
+        .then(data => {
+            if (data.statut === "succes") {
+                alert(data.message);
+                chargerListeClients();
+            } else {
+                alert("Erreur : " + data.message);
+            }
+        })
+        .catch(err => {
+            alert("Erreur lors de la communication avec le serveur.");
+            console.error(err);
+        });
+    }
+}
