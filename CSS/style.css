@@ -10,35 +10,35 @@ body {
 }
 
 .logo {
-    width: 300px;
+    width: 100%;
     height: auto;
-    margin-bottom: 25px;
+    margin-bottom: 1.5625rem;
 }
 
 .form_connexion {
     background-color: white;
-    padding: 45px;
-    border-radius: 12px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 2.8125rem;
+    border-radius: 0.75rem;
+    box-shadow: 0px 0.25rem 0.9375rem rgba(0, 0, 0, 0.1);
     width: 90%;
-    max-width: 420px;
+    max-width: 26.25rem;
     box-sizing: border-box;
 }
 
 .form_connexion p {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: bold;
-    margin: 0 0 8px 0;
+    margin: 0 0 0.5rem 0;
 }
 
 .form_connexion input {
     width: 100%;
-    padding: 14px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 0.875rem;
+    margin-bottom: 1.25rem;
+    border: 0.0625rem solid #ccc;
+    border-radius: 0.375rem;
     box-sizing: border-box;
-    font-size: 16px;
+    font-size: 1rem;
 }
 
 .password-container {
@@ -47,20 +47,20 @@ body {
 }
 
 .password-container input {
-    padding-right: 95px;
+    padding-right: 6rem;
 }
 
 .show-btn {
     position: absolute;
-    right: 8px;
-    bottom: 30px;
-    padding: 10px 17px;
+    right: 0.5rem;
+    bottom: 1.875rem;
+    padding: 0.625rem 1.0625rem;
     background-color: #007BFF;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: bold;
 }
 
@@ -71,14 +71,14 @@ body {
 .connexion-btn {
     background-color: blue;
     color: white;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     display: block;
-    margin: 25px auto 0 auto;
-    padding: 12px 35px;
+    margin: 1.5625rem auto 0 auto;
+    padding: 0.75rem 2.1875rem;
     border: none;
     cursor: pointer;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 1rem;
 }
 
 .connexion-btn:hover {
@@ -87,47 +87,47 @@ body {
 
 body.page-client {
     justify-content: flex-start; 
-    align-items: flex-start;     
-    padding: 40px;               
+    align-items: flex-start;
+    padding: 2.5rem;
     box-sizing: border-box;
 }
 
 #logo_Client {
-    width: 300px;
+    width: 100%;
+    max-width: 18.75rem;
     height: auto;
-    margin-bottom: 25px;
+    margin-bottom: 1.5625rem;
 }
 
 .Recherche {
     width: 100%;
-    max-width: 420px;
-    padding: 14px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    margin-bottom: 30px;
+    max-width: 40rem;
+    padding: 0.875rem;
+    font-size: 1rem;
+    border: 0.0625rem solid #ccc;
+    border-radius: 0.5rem;
     box-sizing: border-box;
-    margin-left: 15%;
+    margin-left: 12%;
 }
 
 .form_fichier {
     background-color: white;
-    width: 100%;
-    max-width: 600px;            
+    width: 90%;
+    max-width: 37.5rem;
     height: 70vh;
-    border-radius: 12px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    box-shadow: 0px 0.25rem 0.9375rem rgba(0, 0, 0, 0.1);
     display: flex;
-    justify-content: center;     
-    align-items: center;         
-    padding: 20px;
-    margin-left: 7%;
-    margin-top: 10%;
-    position: absolute;
+    justify-content: center;
+    align-items: center;
+    padding: 1.25rem;
+    margin-left: 5%; 
+    margin-top: 0,5%;
+    position: relative;
 }
 
 .form_fichier p {
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: bold;
     color: #666;
     margin: 0;
@@ -136,13 +136,14 @@ body.page-client {
 body.page-admin {
     justify-content: flex-start;
     align-items: center;
-    padding: 20px;
+    padding: 1.25rem;
     box-sizing: border-box;
 }
 
 body.page-admin .logo {
-    width: 300px;
-    margin-bottom: 20px;
+    width: 100%;
+    max-width: 18.75rem;
+    margin-bottom: 1.25rem;
 }
 
 .admin-container {
@@ -150,10 +151,10 @@ body.page-admin .logo {
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
-    gap: 40px;
+    gap: 2.5rem;
     width: 100%;
-    max-width: 1100px;
-    margin-top: 20px;
+    max-width: 68.75rem;
+    margin-top: 1.25rem;
     box-sizing: border-box;
 }
 
@@ -172,13 +173,16 @@ body.page-admin .logo {
 .admin-droite .Recherche {
     width: 100%;
     max-width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
+    margin-left: 0;
 }
 
 .admin-droite .form_fichier {
     width: 100%;
     max-width: 100%;
     height: 48vh;
+    margin-left: 0;
+    margin-top: 0;
 }
 
 @media (max-width: 768px) {
@@ -188,75 +192,87 @@ body.page-admin .logo {
         gap: 30px;
     }
 }
+
+.conteneur-formulaires {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2rem;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+
 .form_arborescence {
     background-color: white;
-    width: 100%;
-    max-width: 800px;            
+    width: 45%;
+    max-width: 50rem;            
     height: 74vh;
-    border-radius: 12px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    box-shadow: 0px 0.25rem 0.9375rem rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
     display: flex;
-    justify-content: center;     
-    align-items: center;         
-    padding: 20px;
-    right: 13%;
-    position: absolute;
-    margin-top: 10%;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 1.25rem;
 }
 .form_arborescence p {
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: bold;
     color: #666;
     margin: 0;
     text-align: center;
 }
-.import_client_btn{
-    position: absolute;
-    margin-left: 37%;
-    margin-top: 7%;
-    padding: 10px 17px;
+.barre-outils {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.import_client_btn {
+    display: inline-block;
+    margin: 0;
+    padding: 0.625rem 1.0625rem;
     background-color: #007BFF;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: bold;
-
+    margin-left: 1rem;
 }
 .import_client_btn:hover {
     background-color: #3399ff;
 }
 .form_tab_USER {
-    background-color: white;
+   background-color: white;
     width: 100%;
-    max-width: 800px;            
+    max-width: 50rem;
     height: 75vh;
-    border-radius: 12px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    box-shadow: 0px 0.25rem 0.9375rem rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
-    padding: 20px;
-    position: absolute;
-
+    padding: 1.25rem;
     display: flex;
-    flex-direction: column;     
-    justify-content: center;    
-    align-items: center;        
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 
 .form_tab_USER table {
     width: 100%;
-    margin-bottom: auto;       
+    margin-bottom: auto;
 }
 .form_tab_USER p {
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: bold;
     color: #666;
-    margin: 0;
+    margin: 0 0 auto 0;  
     text-align: center;
-    margin-bottom: auto;  
 }
 .tab_USER{
     width: 100%;
@@ -264,24 +280,19 @@ body.page-admin .logo {
 }
 .tab_USER th{
     background-color: #f4f4f4;
-}
-.form_arborescence {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
+    padding: 0.625rem;
 }
 
 .dossier-statique-wrapper {
     width: 100%;
-    margin-bottom: 15px;
-    border: 1px solid #D0D7DE;
-    border-radius: 6px;
+    margin-bottom: 0.9375rem;
+    border: 0.0625rem solid #D0D7DE;
+    border-radius: 0.375rem;
     background-color: #F6F8FA;
 }
 
 .dossier-header {
-    padding: 10px 15px;
+    padding: 0.625rem 0.9375rem;
     background-color: #EFF1F3;
     cursor: pointer;
     font-weight: bold;
@@ -291,44 +302,45 @@ body.page-admin .logo {
 }
 
 .dossier-header-border {
-    border-bottom: 1px solid #D0D7DE;
+    border-bottom: 0.0625rem solid #D0D7DE;
 }
 
 .dossier-content-fichiers {
-    padding: 10px;
+    padding: 0.625rem;
+    display: none;
 }
 
 .badge-compteur {
     background: #FFF;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 12px;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.625rem;
+    font-size: 0.75rem;
 }
 
 .bloc-fichier-temporaire {
-    padding: 8px;
-    margin-bottom: 5px;
+    padding: 0.5rem;
+    margin-bottom: 0.3125rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px dashed #E1E4E8;
+    border-bottom: 0.0625rem dashed #E1E4E8;
 }
 
 .lien-fichier-pdf {
     color: #007BFF;
     text-decoration: none;
     cursor: pointer;
-    margin-left: 5px;
+    margin-left: 0.3125rem;
 }
 
 .btn-retirer {
     background-color: #DC3545;
     color: #FFF;
     border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 0.6875rem;
 }
 
 .zone-visualisation-pdf {
@@ -336,7 +348,7 @@ body.page-admin .logo {
     height: 100%;
     overflow-y: auto;
     white-space: pre-wrap;
-    padding: 15px;
+    padding: 0.9375rem;
     margin: 0;
 }
 
@@ -348,7 +360,7 @@ body.page-admin .logo {
     border: none;
 }
 .sous-dossier-pdf {
-    margin-left: 20px;
+    margin-left: 1.25rem;
 }
 .dossier-content-fichiers {
     display: none;
@@ -373,5 +385,5 @@ body.page-admin .logo {
 
 .visu-indisponible {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 1.25rem;
 }

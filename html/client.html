@@ -6,25 +6,34 @@
     <title>Client</title>
     <link rel="stylesheet" href="../CSS/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-</script>
+    <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    </script>
     <script src="https://unpkg.com/docx-preview@0.1.15/dist/docx-preview.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-<script src="https://unpkg.com/docx-preview@0.1.15/dist/docx-preview.js"></script>
-
 </head>
-<body class="page-client"> <header><img src="../img/logo_Test.png" alt="logo de l'entreprise" id="logo_Client"></header>
-    <input type="text" placeholder="Rechercher un fichier..." id="barre-recherche" class="Recherche">
-    <button type="button" id="btn-choisir" class="import_client_btn">importer</button>
+<body class="page-client"> 
+    <header>
+        <img src="../img/logo_Test.png" alt="logo de l'entreprise" id="logo_Client">
+    </header>
+    
+    <div class="barre-outils">
+        <input type="text" placeholder="Rechercher un fichier..." id="barre-recherche" class="Recherche">
+        <button type="button" id="btn-choisir" class="import_client_btn">importer</button>
+    </div>
+    
     <input type="file" id="explorateur-fichier" style="display: none;" multiple>
-    <form class="form_fichier">
-        <p>Aucun fichier sélectionner</p>
-    </form>
-    <form class="form_arborescence">
-        <p>Aucun fichier ajouter pour le moment</p>
-    </form>
+    
+    <div class="conteneur-formulaires">
+        <form class="form_fichier">
+            <p>Aucun fichier sélectionné</p>
+        </form>
+        
+        <form class="form_arborescence">
+            <p>Aucun fichier ajouté pour le moment</p>
+        </form>
+    </div>
+
     <script src="../JS/client.js"></script>
 </body>
 </html>
