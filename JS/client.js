@@ -16,12 +16,18 @@ const CONFIG_CATEGORIES_PDF = [
   {
         nom: " Factures",
         motsClefs: [
-            "facture",  
-            "total à payer",
+           "facture",
+            "numéro de facture",
+            "référence facture",
+            "montant total",
+            "montant ttc",
+            "montant ht",
+            "tva",
+            "conditions de paiement",
             "date d'échéance",
-            "règlement",
-            "ttc",             
-            "ht"              
+            "total à payer",
+            "ht",
+            "ttc"
         ]
     },
     {
@@ -48,6 +54,8 @@ const CONFIG_CATEGORIES_PDF = [
             "bon pour accord",
             "coût estimatif",
             "validité du devis",
+            "prix unitaire",
+            "quantité",
             "total estimé"
         ]
     },
@@ -171,7 +179,7 @@ async function afficherFichiers(listeAAfficher) {
         });
 
         
-        if (dossierStatique.nom === " Documents PDF") {// gestion de l'affichage pour les pdf avec leur sous dossier
+       if (dossierStatique.nom === " Documents PDF" || dossierStatique.nom === " Fichiers Word") {// gestion de l'affichage pour les pdf avec leur sous dossier
             const messageChargement = document.createElement('p');
             messageChargement.textContent = "Analyse du contenu des PDF en cours...";
             messageChargement.className = 'message-chargement-pdf';
@@ -196,7 +204,7 @@ async function afficherSousDossiersPDF(fichiersPDF, conteneurParent, messageChar
     const groupes = new Map();
 
     for (const fichier of fichiersPDF) {
-        const { nom, score } = await categoriserPDF(fichier);
+        const { nom, score } = await categoriserFichier(fichier);
         if (!groupes.has(nom)) {
             groupes.set(nom, []);//le code vérifie si la catégorie existe déjà dans le dictionnaire si elle n'existe pas encore, il crée une liste vide [] pour cette catégorie.
         }
@@ -242,17 +250,29 @@ async function afficherSousDossiersPDF(fichiersPDF, conteneurParent, messageChar
     });
 }
 
-
+async function extraireTexteDocx(urlServeur) {
+    const res = await fetch(urlServeur);
+    const blob = await res.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value.toLowerCase();
+}
 // Retourne { nom, score } où score est le pourcentage de mots-clés matchés (0 si non classé).
-async function categoriserPDF(fichier) {
-    let texte = cacheTextesPDF.get(fichier.id);// permet de savoir si on a déja lu ce fichier
+async function categoriserFichier(fichier) {
+    let texte = cacheTextesPDF.get(fichier.id);
 
-    if (texte === undefined) {// si on l'a pas déja lu on extrait le texte
+    if (texte === undefined) {
         try {
             const urlServeur = "../PHP/" + fichier.chemin_fichier;
-            texte = await extraireTextePDF(urlServeur);
+            if (fichier.nom_fichier.endsWith('.pdf')) {
+                texte = await extraireTextePDF(urlServeur);
+            } else if (fichier.nom_fichier.endsWith('.docx')) {
+                texte = await extraireTexteDocx(urlServeur);
+            } else {
+                texte = "";
+            }
         } catch (err) {
-            console.error("Erreur lors de l'analyse du PDF " + fichier.nom_fichier + " :", err);
+            console.error("Erreur lors de l'analyse de " + fichier.nom_fichier + " :", err);
             texte = "";
         }
         cacheTextesPDF.set(fichier.id, texte);
@@ -260,7 +280,6 @@ async function categoriserPDF(fichier) {
 
     return determinerCategoriePDF(texte);
 }
-
 // Extrait tout le texte d'un PDF en minuscule, via pdf.js.
 async function extraireTextePDF(urlServeur) {
     const pdf = await pdfjsLib.getDocument(urlServeur).promise;
