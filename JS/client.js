@@ -3,13 +3,9 @@ const selecteurFichier = document.getElementById('explorateur-fichier');
 const conteneurFormDroite = document.querySelector('.form_arborescence'); 
 const conteneurFormGauche = document.querySelector('.form_fichier'); 
 const barreRecherche = document.getElementById('barre-recherche');
+const toggleRenommageAuto = document.getElementById('toggle-renommage-auto');
 
-const CONFIG_DOSSIERS = [
-    { nom: " Documents PDF", extensions: ['.pdf'] },
-    { nom: " Images & Photos", extensions: ['.jpg', '.jpeg', '.png', '.gif'] },
-    { nom: " Fichiers Word", extensions: ['.docx'] },
-    { nom: " Autres fichiers", extensions: [] } 
-];
+
 
 // Catégories utilisées pour ranger les PDF en fonction des mots présents dans leur contenu
 const CONFIG_CATEGORIES_PDF = [
@@ -74,13 +70,25 @@ const CONFIG_CATEGORIES_PDF = [
     { nom: " PDF non classés", motsClefs: [] }
 ];
 let tousLesFichiers = []; 
+let nomsAffichesActuels = new Map();
 
 
 const cacheTextesPDF = new Map();// Permet d'éviter de re-analyser un PDF déjà traité 
+const cacheDatesCreation = new Map();// Permet d'éviter de re-lire les métadonnées d'un fichier déjà traité
 
 bouton.addEventListener('click', () => {
     selecteurFichier.click();
 });
+if (toggleRenommageAuto) {
+    toggleRenommageAuto.addEventListener('change', () => {
+        // Si une recherche est en cours, on la relance pour ne pas l'écraser
+        if (barreRecherche && barreRecherche.value.trim() !== "") {
+            barreRecherche.dispatchEvent(new Event('input'));
+        } else {
+            afficherFichiers(tousLesFichiers); // réaffiche avec ou sans renommage selon l'état du toggle
+        }
+    });
+}
 
 selecteurFichier.addEventListener('change', (evenement) => {
     const fichiers = evenement.target.files;
@@ -131,30 +139,31 @@ async function afficherFichiers(listeAAfficher) {
         return;
     }
 
-    const distributionDossiers = CONFIG_DOSSIERS.map(dossier => ({
-        nom: dossier.nom,
-        extensions: dossier.extensions,
-        fichiers: []
-    }));
+    const messageChargement = document.createElement('p');
+    messageChargement.textContent = "Analyse du contenu des fichiers en cours...";
+    messageChargement.className = 'message-chargement-pdf';
+    conteneurFormDroite.appendChild(messageChargement);
 
-    listeAAfficher.forEach(fichier => {
-        const nomFichierMinuscule = fichier.nom_fichier.toLowerCase();
-        
-        let trouve = distributionDossiers.find(dossier => // on cherche le premier dossier de CONFIG_DOSSIERS qui accepte l'extension de ce fichier
-            dossier.extensions.some(ext => nomFichierMinuscule.endsWith(ext))
-        );
+    // On catégorise TOUS les fichiers (peu importe leur type) directement par contenu.
+    const groupes = new Map();
 
-        if (!trouve) {// si on n'a trouvé aucun dossier correspondant, on le met dans le tout dernier ("Autres fichiers")
-            trouve = distributionDossiers[distributionDossiers.length - 1];
+    for (const fichier of listeAAfficher) {
+        const { nom, score, dateCreation } = await categoriserFichier(fichier);
+        if (!groupes.has(nom)) {
+            groupes.set(nom, []);
         }
+        groupes.get(nom).push({ fichier, score, dateCreation });
+    }
 
-        trouve.fichiers.push(fichier);// on range le fichier dans son dossier attitré
-    });
+    messageChargement.remove();
 
-    for (const dossierStatique of distributionDossiers) {
-        if (dossierStatique.fichiers.length === 0) continue;
+    CONFIG_CATEGORIES_PDF.forEach(categorie => {// création des blocs html, un par catégorie
+        const entrees = groupes.get(categorie.nom);
+        if (!entrees || entrees.length === 0) return;
 
-        const conteneurDossier = document.createElement('div');// créé les blocs html
+        entrees.sort((a, b) => b.score - a.score); // les fichiers les plus pertinents en premier
+
+        const conteneurDossier = document.createElement('div');
         conteneurDossier.className = 'dossier-statique-wrapper';
         
         const enteteDossier = document.createElement('div');
@@ -163,92 +172,40 @@ async function afficherFichiers(listeAAfficher) {
         const listeFichiersDossier = document.createElement('div');
         listeFichiersDossier.className = 'dossier-content-fichiers';
         
-        enteteDossier.innerHTML = `<span>${dossierStatique.nom} </span> <span class="badge-compteur">${dossierStatique.fichiers.length}</span>`;
+        enteteDossier.innerHTML = `<span>${categorie.nom} </span> <span class="badge-compteur">${entrees.length}</span>`;
 
         enteteDossier.addEventListener('click', () => {
-            const enCoursDaffichage = listeFichiersDossier.classList.contains('visible');// gere l'affichage des dossier
-            if (enCoursDaffichage) {//il regarde si le dossier a déjà la classe CSS visible
+            const enCoursDaffichage = listeFichiersDossier.classList.contains('visible');
+            if (enCoursDaffichage) {
                 listeFichiersDossier.classList.remove('visible');
                 enteteDossier.classList.remove('dossier-header-border');
-                enteteDossier.querySelector('span').textContent = `${dossierStatique.nom} `;
             } else {
                 listeFichiersDossier.classList.add('visible');
                 enteteDossier.classList.add('dossier-header-border');
-                enteteDossier.querySelector('span').textContent = `${dossierStatique.nom} `;
             }
         });
 
-        
-       if (dossierStatique.nom === " Documents PDF" || dossierStatique.nom === " Fichiers Word") {// gestion de l'affichage pour les pdf avec leur sous dossier
-            const messageChargement = document.createElement('p');
-            messageChargement.textContent = "Analyse du contenu des PDF en cours...";
-            messageChargement.className = 'message-chargement-pdf';
-            listeFichiersDossier.appendChild(messageChargement);
+            entrees.forEach(({ fichier, score, dateCreation }) => {
+            const renommageActif = !toggleRenommageAuto || toggleRenommageAuto.checked;
 
-            afficherSousDossiersPDF(dossierStatique.fichiers, listeFichiersDossier, messageChargement);
-        } else {
-            dossierStatique.fichiers.forEach(fichier => {
-                listeFichiersDossier.appendChild(creerBlocFichier(fichier));
-            });
-        }
+            // On ne renomme pas si le renommage auto est désactivé, ni les fichiers non classés
+            const nomAffichage = (renommageActif && categorie.nom !== " PDF non classés")
+                ? genererNomAffichage(fichier, categorie.nom, dateCreation)
+                : null;
 
-        conteneurDossier.appendChild(enteteDossier);
-        conteneurDossier.appendChild(listeFichiersDossier);
-        conteneurFormDroite.appendChild(conteneurDossier);
-    }
-}
+            // On mémorise le nom réellement affiché pour que la recherche puisse le retrouver
+            nomsAffichesActuels.set(fichier.id, nomAffichage || fichier.nom_fichier);
 
-
-async function afficherSousDossiersPDF(fichiersPDF, conteneurParent, messageChargement) {// Analyse chaque PDF et les répartit dans des sous-dossiers en fonction de leur contenu.
-    
-    const groupes = new Map();
-
-    for (const fichier of fichiersPDF) {
-        const { nom, score } = await categoriserFichier(fichier);
-        if (!groupes.has(nom)) {
-            groupes.set(nom, []);//le code vérifie si la catégorie existe déjà dans le dictionnaire si elle n'existe pas encore, il crée une liste vide [] pour cette catégorie.
-        }
-        groupes.get(nom).push({ fichier, score });//il ajoute le fichier actuel et son score de correspondance dans la bonne liste
-    }
-
-    messageChargement.remove();
-
-    CONFIG_CATEGORIES_PDF.forEach(categorie => {// création des blocs html
-        const entrees = groupes.get(categorie.nom);
-        if (!entrees || entrees.length === 0) return;
-
-        const sousDossier = document.createElement('div');
-        sousDossier.className = 'dossier-statique-wrapper sous-dossier-pdf';
-
-        const enteteSousDossier = document.createElement('div');
-        enteteSousDossier.className = 'dossier-header sous-dossier-header';
-        enteteSousDossier.innerHTML = `<span>${categorie.nom} </span> <span class="badge-compteur">${entrees.length}</span>`;
-
-        const contenuSousDossier = document.createElement('div');
-        contenuSousDossier.className = 'dossier-content-fichiers';
-
-        enteteSousDossier.addEventListener('click', () => {
-            const enCoursDaffichage = contenuSousDossier.classList.contains('visible');
-            if (enCoursDaffichage) {
-                contenuSousDossier.classList.remove('visible');
-                enteteSousDossier.classList.remove('dossier-header-border');
-            } else {
-                contenuSousDossier.classList.add('visible');
-                enteteSousDossier.classList.add('dossier-header-border');
-            }
+            const bloc = creerBlocFichier(fichier, nomAffichage, score);
+            listeFichiersDossier.appendChild(bloc);
         });
 
-        entrees.forEach(({ fichier }) => {
-            const bloc = creerBlocFichier(fichier);
-
-            contenuSousDossier.appendChild(bloc);
+            conteneurDossier.appendChild(enteteDossier);
+            conteneurDossier.appendChild(listeFichiersDossier);
+            conteneurFormDroite.appendChild(conteneurDossier);
         });
-
-        sousDossier.appendChild(enteteSousDossier);
-        sousDossier.appendChild(contenuSousDossier);
-        conteneurParent.appendChild(sousDossier);
-    });
 }
+
 
 async function extraireTexteDocx(urlServeur) {
     const res = await fetch(urlServeur);
@@ -257,18 +214,72 @@ async function extraireTexteDocx(urlServeur) {
     const result = await mammoth.extractRawText({ arrayBuffer });
     return result.value.toLowerCase();
 }
-// Retourne { nom, score } où score est le pourcentage de mots-clés matchés (0 si non classé).
+async function extraireTexteXlsx(urlServeur) {
+    const res = await fetch(urlServeur);
+    const arrayBuffer = await res.arrayBuffer();
+    const classeur = XLSX.read(arrayBuffer, { type: 'array' });
+
+    let texteComplet = "";
+    classeur.SheetNames.forEach(nomFeuille => {
+        const feuille = classeur.Sheets[nomFeuille];
+        const texteFeuille = XLSX.utils.sheet_to_csv(feuille); // convertit toutes les cellules en texte
+        texteComplet += texteFeuille + " ";
+    });
+
+    return texteComplet.toLowerCase();
+}
+
+async function extraireTexteCsv(urlServeur) {
+    const res = await fetch(urlServeur);
+    const texte = await res.text();
+    return texte.toLowerCase();
+}
+
+async function extraireTextePptx(urlServeur) {
+    const res = await fetch(urlServeur);
+    const blob = await res.blob();
+    const zip = await JSZip.loadAsync(blob);
+
+    let texteComplet = "";
+    const fichiersSlides = Object.keys(zip.files).filter(nom =>
+        nom.match(/^ppt\/slides\/slide\d+\.xml$/)
+    );
+
+    for (const nomFichier of fichiersSlides) {
+        const xml = await zip.file(nomFichier).async("string");
+        const morceauxTexte = [...xml.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(m => m[1]);
+        texteComplet += morceauxTexte.join(" ") + " ";
+    }
+
+    return texteComplet.toLowerCase();
+}
+// Retourne { nom, score, dateCreation } où score est le nombre de mots-clés
 async function categoriserFichier(fichier) {
     let texte = cacheTextesPDF.get(fichier.id);
+    let dateCreation = cacheDatesCreation.get(fichier.id);
 
     if (texte === undefined) {
         try {
             const urlServeur = "../PHP/" + fichier.chemin_fichier;
-            if (fichier.nom_fichier.endsWith('.pdf')) {
+            const nomMinuscule = fichier.nom_fichier.toLowerCase();
+
+            if (nomMinuscule.endsWith('.pdf')) {
                 texte = await extraireTextePDF(urlServeur);
-            } else if (fichier.nom_fichier.endsWith('.docx')) {
+                dateCreation = await extraireDateCreationPDF(urlServeur);
+            } else if (nomMinuscule.endsWith('.docx')) {
                 texte = await extraireTexteDocx(urlServeur);
+                dateCreation = await extraireDateCreation(urlServeur);
+            } else if (nomMinuscule.endsWith('.xlsx')) {
+                texte = await extraireTexteXlsx(urlServeur);
+                dateCreation = await extraireDateCreation(urlServeur);
+            } else if (nomMinuscule.endsWith('.pptx')) {
+                texte = await extraireTextePptx(urlServeur);
+                dateCreation = await extraireDateCreation(urlServeur);
+            } else if (nomMinuscule.endsWith('.csv')) {
+                texte = await extraireTexteCsv(urlServeur);
+                dateCreation = null;
             } else {
+                
                 texte = "";
             }
         } catch (err) {
@@ -276,9 +287,53 @@ async function categoriserFichier(fichier) {
             texte = "";
         }
         cacheTextesPDF.set(fichier.id, texte);
+        cacheDatesCreation.set(fichier.id, dateCreation || null);
     }
 
-    return determinerCategoriePDF(texte);
+    const { nom, score } = determinerCategoriePDF(texte);
+    return { nom, score, dateCreation };
+}
+
+// Extrait la date de création depuis les métadonnées internes du PDF (si disponible).
+async function extraireDateCreationPDF(urlServeur) {
+    try {
+        const pdf = await pdfjsLib.getDocument(urlServeur).promise;
+        const { info } = await pdf.getMetadata();
+        if (info && info.CreationDate) {
+            return FormatDatePDF(info.CreationDate);
+        }
+    } catch (err) {
+        console.error("Erreur lecture métadonnées PDF :", err);
+    }
+    return null;
+}
+
+// Les PDF stockent la date au format "D:20260707143210+02'00'"
+function FormatDatePDF(dateBrute) {
+    const match = dateBrute.match(/D:(\d{4})(\d{2})(\d{2})/);
+    if (!match) return null;
+    const [, annee, mois, jour] = match;
+    const dateObj = new Date(`${annee}-${mois}-${jour}`);
+    return isNaN(dateObj.getTime()) ? null : dateObj;
+}
+
+
+// Extrait la date de création depuis les métadonnées internes 
+async function extraireDateCreation(urlServeur) {
+    try {
+        const res = await fetch(urlServeur);
+        const blob = await res.blob();
+        const zip = await JSZip.loadAsync(blob);
+        const coreXml = await zip.file("docProps/core.xml").async("string");
+        const match = coreXml.match(/<dcterms:created[^>]*>([^<]+)<\/dcterms:created>/);
+        if (match) {
+            const dateObj = new Date(match[1]);
+            return isNaN(dateObj.getTime()) ? null : dateObj;
+        }
+    } catch (err) {
+        console.error("Erreur lecture métadonnées DOCX :", err);
+    }
+    return null;
 }
 // Extrait tout le texte d'un PDF en minuscule, via pdf.js.
 async function extraireTextePDF(urlServeur) {
@@ -331,9 +386,35 @@ function determinerCategoriePDF(texteMinuscule) {
 
     return { nom: CONFIG_CATEGORIES_PDF[CONFIG_CATEGORIES_PDF.length - 1].nom, score: 0 };
 }
+// Transforme " Factures" -> "factures", " PDF non classés" -> "pdf_non_classes", etc.
+function slugifierNomCategorie(nom) {
+    return nom
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+}
+
+function formaterDate(dateObj) {
+    if (!dateObj || isNaN(dateObj.getTime())) return null;
+    const jj = String(dateObj.getDate()).padStart(2, '0');
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const aaaa = dateObj.getFullYear();
+    return `${aaaa}-${mm}-${jj}`;
+}
+
+// Construit le nom affiché, ex "factures_2026-07-07.pdf"
+function genererNomAffichage(fichier, nomCategorie, dateCreation) {
+    const slug = slugifierNomCategorie(nomCategorie);
+    const date = formaterDate(dateCreation);
+    const extension = fichier.nom_fichier.slice(fichier.nom_fichier.lastIndexOf('.'));
+    const suffixeDate = date ? `_${date}` : ""; // le "_" n'est ajouté que si une date existe
+    return `${slug}${suffixeDate}${extension}`;
+}
 
 // Crée le bloc (lien + bouton "Retirer") représentant un fichier.
-function creerBlocFichier(fichier) {
+function creerBlocFichier(fichier, nomAffichage, score) {
     const nouveauBloc = document.createElement('div');
     nouveauBloc.className = 'bloc-fichier-temporaire';
 
@@ -343,27 +424,28 @@ function creerBlocFichier(fichier) {
 
     const lienFichier = document.createElement('a');
     lienFichier.href = "#"; 
-    lienFichier.textContent = fichier.nom_fichier;
+    lienFichier.textContent = nomAffichage || fichier.nom_fichier;
     lienFichier.className = 'lien-fichier-pdf';
 
     lienFichier.addEventListener('click', (e) => {
         e.preventDefault(); 
         conteneurFormGauche.innerHTML = "";
         const urlServeur = "../PHP/" + fichier.chemin_fichier;
+        const nomMinuscule = fichier.nom_fichier.toLowerCase();
 
-        if (fichier.nom_fichier.match(/\.(jpeg|jpg|png|gif)$/i)) {
+        if (nomMinuscule.match(/\.(jpeg|jpg|png|gif)$/)) {
             const img = document.createElement('img');
             img.src = urlServeur;
             img.className = 'visu-media';
             conteneurFormGauche.appendChild(img);
         } 
-        else if (fichier.nom_fichier.endsWith('.pdf')) {
+        else if (nomMinuscule.endsWith('.pdf')) {
             const iframe = document.createElement('iframe');
             iframe.src = urlServeur;
             iframe.className = 'visu-media';
             conteneurFormGauche.appendChild(iframe);
         } 
-        else if (fichier.nom_fichier.endsWith('.docx')) {
+        else if (nomMinuscule.endsWith('.docx')) {
             const zoneWord = document.createElement('div');
             zoneWord.className = 'visu-media visu-media--docx';
             conteneurFormGauche.appendChild(zoneWord);
@@ -372,6 +454,40 @@ function creerBlocFichier(fichier) {
             .then(res => res.blob())
             .then(blob => {
                 docx.renderAsync(blob, zoneWord).catch(err => console.error(err));
+            });
+        }
+        else if (nomMinuscule.endsWith('.xlsx') || nomMinuscule.endsWith('.xls')) {
+            const zoneTableau = document.createElement('div');
+            zoneTableau.className = 'visu-media visu-media--tableau';
+            conteneurFormGauche.appendChild(zoneTableau);
+
+            fetch(urlServeur)
+            .then(res => res.arrayBuffer())
+            .then(arrayBuffer => {
+                const classeur = XLSX.read(arrayBuffer, { type: 'array' });
+                const premiereFeuille = classeur.Sheets[classeur.SheetNames[0]];
+                zoneTableau.innerHTML = XLSX.utils.sheet_to_html(premiereFeuille);
+            })
+            .catch(err => {
+                console.error(err);
+                zoneTableau.textContent = "Impossible d'afficher ce fichier.";
+            });
+        }
+        else if (nomMinuscule.endsWith('.csv')) {
+            const zoneTableau = document.createElement('div');
+            zoneTableau.className = 'visu-media visu-media--tableau';
+            conteneurFormGauche.appendChild(zoneTableau);
+
+            fetch(urlServeur)
+            .then(res => res.text())
+            .then(texteCsv => {
+                const classeur = XLSX.read(texteCsv, { type: 'string' });
+                const feuille = classeur.Sheets[classeur.SheetNames[0]];
+                zoneTableau.innerHTML = XLSX.utils.sheet_to_html(feuille);
+            })
+            .catch(err => {
+                console.error(err);
+                zoneTableau.textContent = "Impossible d'afficher ce fichier.";
             });
         }
         else {
@@ -442,11 +558,14 @@ if (barreRecherche) {
         const texteSaisi = evenement.target.value.toLowerCase().trim();
 
         const fichiersFiltres = tousLesFichiers.filter(fichier => {
-            return fichier.nom_fichier.toLowerCase().includes(texteSaisi);
+            const nomOrigine = fichier.nom_fichier.toLowerCase();
+            const nomAffiche = (nomsAffichesActuels.get(fichier.id) || "").toLowerCase();
+
+            return nomOrigine.includes(texteSaisi) || nomAffiche.includes(texteSaisi);
         });
 
         afficherFichiers(fichiersFiltres);
     });
 }
 
-document.addEventListener('DOMContentLoaded', chargerFichiersUtilisateur);
+document.addEventListener('DOMContentLoaded', chargerFichiersUtilisateur);  
